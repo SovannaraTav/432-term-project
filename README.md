@@ -1,1 +1,1 @@
-# 432-term-project
+# 432-term-project (Battleship Game)
