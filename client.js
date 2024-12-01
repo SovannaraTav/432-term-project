@@ -1,38 +1,58 @@
 /*
 Helpful references:
-1) https://nodejs.org/api/net.html
-2) https://node.readthedocs.io/en/latest/api/net/
-3) https://www.tutorialspoint.com/nodejs/nodejs_net_module.htm
-4) https://dev.to/devstoriesplayground/unveiling-the-power-of-tcp-building-apps-with-nodejss-net-module-2n8c
+1) net module:
+a) https://nodejs.org/api/net.html
+b) https://node.readthedocs.io/en/latest/api/net/
+c) https://www.tutorialspoint.com/nodejs/nodejs_net_module.htm
+d) https://dev.to/devstoriesplayground/unveiling-the-power-of-tcp-building-apps-with-nodejss-net-module-2n8c
+
+2) ws and websocket libraries
+a) https://www.npmjs.com/package/ws
+b) https://www.npmjs.com/package/websocket
+c) https://dev.to/codesphere/getting-started-with-web-sockets-in-nodejs-49n0
+d) My CSS 481 course textbook on web sockets (Chapter 8, Section 12)
+    (https://www.zybooks.com/catalog/web-programming/)
 */
 
-// Client information
-const net = require("node:net");
-const portNumber = 8080;
-const host = "localhost";
+// WebSocket client information
+const webSocketPortNumber = 8081;
+const webSocketHost = "localhost";
 
-const client = net.createConnection(portNumber, host, () => {
-    // Indicates when a client has connected to the server
-    console.log("[Client] - Connected to server!");
+// Establishes a WebSocket client to connect to the WebSocket server
+const webSocketClient = 
+    new WebSocket(`ws://${webSocketHost}:${webSocketPortNumber}`);
 
-    // Sends a response from the client to the server
-    client.write("[Client] - Hello server!");
-});
+/*
+Handles the event when the WebSocket client is connected to the WebSocket server
+*/
+webSocketClient.onopen = () => {
+    console.log("[WebSocket Client] - Connected to WebSocket Server!");
+    document.getElementById("status").innerText = 
+        "WebSocket client connected to Websocket server!";
+};
 
-// Handles the event when receiving data from the server to the client
-client.on("data", (data) => {
-    console.log(`[Client] - Received data from server: ${data.toString()}`);
+/*
+Handles the event when receiving data from the WebSocket server to the WebSocket 
+client
+*/
+webSocketClient.onmessage = (event) => {
+    console.log(
+        `[WebSocket Client] - Received data from WebSocket server: ${event.data}`);
+};
 
-    // Closes the client connection to the server
-    client.end();
-});
+// Handles the event when there are errors from the WebSocket client
+webSocketClient.onerror = (error) => {
+    console.error(`[WebSocket Client] - Error: ${error}`);
+    document.getElementById("status").innerText = 
+        "WebSocket client error connecting to Websocket server";
+};
 
-// Handles the event when the client disconnects from the server
-client.on("end", () => {
-    console.log("[Client] - Disconnected from server!");
-});
-
-// Handles the event when there are errors from the client
-client.on("error", (err) => {
-    console.error(`[Client] - Error: ${err}`);
-});
+/*
+Function to allow the WebSocket client to send a message to the WebSocket server
+*/
+function sendMessage() {
+    let message = document.getElementById("messageInput").value;
+    console.log(
+        `[WebSocket Client] - Sending message to WebSocket server: ${message}`);
+    webSocketClient.send(message);
+}
