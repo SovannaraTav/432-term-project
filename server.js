@@ -33,7 +33,7 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
             `[NetTCP Server] - Received data from NetTCP client: ${data.toString()}`);
 
         // Sends a response from the NetTCP server to the NetTCP client
-        socketTCP.write("[NetTCP Server] - Hello NetTCP client!");
+        socketTCP.write(`[NetTCP Server] - Received ${data.toString()} from NetTCP client`);
     });
 
     /*
@@ -111,7 +111,7 @@ webSocketServer.on("connection", (socketWeb) => {
         server
         */
         netTCPClient.on("end", () => {
-            console.log("[NetTCP Client] - Disconnected from NetTCP server!");
+            console.log("[NetTCP Client] - Disconnected from NetTCP server!\n\n");
         });
         
         // Handles the event when there are errors from the NetTCP client

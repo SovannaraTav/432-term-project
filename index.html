@@ -2,16 +2,32 @@
 <html>
     <head>
         <title>Battleship Game</title>
+        <link href="styles.css" rel="stylesheet">
     </head>
     <body>
         <h1>Battleship Game</h1>
+        <!-- Displays the connection status to the user -->
         <p id="status">Connecting...</p>
-        <label htmlFor="messageInput">Message: </label>
+
+        <!-- Allows the user to send their selected coordinate to the WebSocket and 
+        NetTCP servers as well as update the state of the grid for the battleship game -->
+        <label for="messageInput">Message: </label>
         <input 
             type="text" id="messageInput" name="messageInput" 
             placeholder="Enter a message to send">
-        <button onclick="sendMessage()">Send Message</button>
+        <button id="send" onclick="sendMessage()">Send Message</button>
 
+        <!-- Displays to the user whether their selected coordinate was a hit or miss 
+        for the grid of the battleship game-->
+        <p>Result: <span id="message"></span></p>
+
+        <table id="grid" class="grid">
+            <!-- script.js handles the process of creating the grid for the battleship 
+            game -->
+        </table>
+
+        <!-- JavaScript files to load in and execute -->
         <script src="client.js"></script>
+        <script src="script.js"></script>
     </body>
 </html>

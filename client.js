@@ -44,7 +44,7 @@ webSocketClient.onmessage = (event) => {
 webSocketClient.onerror = (error) => {
     console.error(`[WebSocket Client] - Error: ${error}`);
     document.getElementById("status").innerText = 
-        "WebSocket client error connecting to Websocket server";
+        "WebSocket client error connecting to WebSocket server";
 };
 
 /*

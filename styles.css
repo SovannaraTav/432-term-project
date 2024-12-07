@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+td {
+    width: 40px;
+    height: 40px;
+    border: 2px solid black;
+    cursor: pointer;
+}
+
+td:hover {
+    background-color: lightgray;
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 18px;
+}
