@@ -94,7 +94,7 @@ class NetworkManager {
     register(username) {
         let registerData = {
             action: "register",
-            result: username
+            payload: username
         };
         this.send(JSON.stringify(registerData));
     }
@@ -114,10 +114,10 @@ class NetworkManager {
     Function to allow the WebSocket client to create a game to the WebSocket 
     server through the NetworkManager
     */
-    createGame(gameId) {
+    createGame(gameId, username) {
         let createGameData = {
             action: "createGame",
-            result: gameId
+            payload: [gameId, username]
         };
         this.send(JSON.stringify(createGameData));
     }
@@ -126,10 +126,10 @@ class NetworkManager {
     Function to allow the WebSocket client to join a game to the WebSocket 
     server through the NetworkManager
     */
-    joinGame(gameId) {
+    joinGame(gameId, username) {
         let joinGameData = {
             action: "joinGame",
-            result: gameId
+            payload: [gameId, username]
         };
         this.send(JSON.stringify(joinGameData));
     }
@@ -138,10 +138,10 @@ class NetworkManager {
     Function to allow the WebSocket client to exit a game to the WebSocket 
     server through the NetworkManager
     */
-    exitGame(gameId) {
+    exitGame(gameId, username) {
         let exitGameData = {
             action: "exitGame",
-            result: gameId
+            payload: [gameId, username]
         };
         this.send(JSON.stringify(exitGameData));
     }
@@ -153,7 +153,7 @@ class NetworkManager {
     unregister(username) {
         let unregisterData = {
             action: "unregister",
-            result: username
+            payload: username
         };
         this.send(JSON.stringify(unregisterData));
     }
@@ -201,7 +201,8 @@ through the NetworkManager
 */
 function createGame() {
     let createGameId = document.getElementById("createGameInput").value;
-    networkManager.createGame(createGameId);
+    let username = document.getElementById("registerInput").value;
+    networkManager.createGame(createGameId, username);
 }
 
 /*
@@ -210,7 +211,8 @@ through the NetworkManager
 */
 function joinGame() {
     let joinGameId = document.getElementById("joinGameInput").value;
-    networkManager.joinGame(joinGameId);
+    let username = document.getElementById("registerInput").value;
+    networkManager.joinGame(joinGameId, username);
 }
 
 /*
@@ -219,7 +221,8 @@ through the NetworkManager
 */
 function exitGame() {
     let exitGameId = document.getElementById("exitGameInput").value;
-    networkManager.exitGame(exitGameId);
+    let username = document.getElementById("registerInput").value;
+    networkManager.exitGame(exitGameId, username);
 }
 
 /*

@@ -14,6 +14,10 @@ d) My CSS 481 course textbook on web sockets (Chapter 8, Section 12)
     (https://www.zybooks.com/catalog/web-programming/)
 */
 
+// List of registered players and games for the servers
+let listOfRegisteredPlayers = {};
+let listOfGames = {};
+
 // NetTCP server information
 const netTCP = require("node:net");
 const netTCPPortNumber = 8080;
@@ -31,8 +35,8 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
     socketTCP.on("data", (data) => {
         console.log(
             `[NetTCP Server] - Received data from NetTCP client: ${data.toString()}`);
-
-        // For if the data received is a grid coordinate
+        
+        // For when the data received is a grid coordinate
         if (data.toString().length === 2) {
             // Sends a response from the NetTCP server to the NetTCP client
             socketTCP.write(
@@ -40,39 +44,206 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
             return;
         }
 
-        // For if the data received is a network action
+        // For when the data received is a network action on the servers
         let parseData = JSON.parse(data);
+        let response = {
+            action: "",
+            success: false,
+            result: "",
+        }
         switch (parseData.action) {
+            /*
+            Handles the case when the network action is registering a new username 
+            on the servers as well indicating if the username is already registered
+            */
             case "register":
-                console.log(
-                    `[NetTCP Server] - Registering the username: ${parseData.result}`);
+                response.action = parseData.action;
+                let usernameToRegister = parseData.payload;
+                if (!listOfRegisteredPlayers[usernameToRegister]) {
+                    console.log(
+                        `[NetTCP Server] - Registering the username: ${usernameToRegister}`);
+                    listOfRegisteredPlayers[usernameToRegister] = true;
+                    response.success = true;
+                    response.result = usernameToRegister;
+                }
+                else {
+                    console.log(
+                        `[NetTCP Server] - The username ${usernameToRegister} is already registered`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${usernameToRegister} is already registered`;
+                }
                 break;
+
+            /*
+            Handles the case when the network action is returning the list of games 
+            on the servers as well as indicating if the list of games is empty
+            */
             case "listGames":
-                console.log(`[NetTCP Server] - Listing games:`);
+                response.action = parseData.action;
+                if (Object.keys(listOfGames).length !== 0) {
+                    console.log("[NetTCP Server] - Returning list of games");
+                    response.success = true;
+                    response.result = Object.keys(listOfGames);
+                }
+                else {
+                    console.log("[NetTCP Server] - Empty game list");
+                    response.success = false;
+                    response.result = "Empty game list";
+                }
                 break;
+
+            /*
+            Handles the case when the network action is a registered username 
+            creating a new game with an id on the servers as well as indicating if 
+            the registered username isn't registered and if a game with the id 
+            already exists
+            */
             case "createGame":
-                console.log(
-                    `[NetTCP Server] - Creating game with id #${parseData.result}`);
+                response.action = parseData.action;
+                let createGameId = parseData.payload[0];
+                let usernameCreatingGame = parseData.payload[1];
+                if (!listOfGames[createGameId] && 
+                    listOfRegisteredPlayers[usernameCreatingGame]) {
+                    console.log(
+                        `[NetTCP Server] - Creating game with the id #${createGameId} by ${usernameCreatingGame}`);
+                    listOfGames[createGameId] = { listOfPlayers: [] };
+                    listOfGames[createGameId].listOfPlayers.push(usernameCreatingGame);
+                    response.success = true;
+                    response.result = createGameId;
+                }
+                else if (!listOfRegisteredPlayers[usernameCreatingGame]) {
+                    console.log(
+                        `[NetTCP Server] - The username ${usernameCreatingGame} isn't registered to create a game with id #${createGameId}`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${usernameCreatingGame} isn't registered to create a game with id #${createGameId}`;
+                }
+                else {
+                    console.log(
+                        `[NetTCP Server] - Game with the id #${createGameId} already exists`);
+                    response.success = false;
+                    response.result = `Game with the id #${createGameId} already exists`;
+                }
                 break;
+
+            /*
+            Handles the case when the network action is a registered username 
+            joining an existing game on the servers by its id as well as indicating 
+            if the registered username isn't registered, if the registered username 
+            has already join the game, and if the game with the id doesn't exists
+            */
             case "joinGame":
-                console.log(
-                    `[NetTCP Server] - Joining game with id #${parseData.result}`);
+                response.action = parseData.action;
+                let joinGameId = parseData.payload[0];
+                let usernameJoiningGame = parseData.payload[1];
+                if (listOfGames[joinGameId] && 
+                    listOfRegisteredPlayers[usernameJoiningGame] && 
+                    !listOfGames[joinGameId].listOfPlayers.includes(usernameJoiningGame)) {
+                    console.log(
+                        `[NetTCP Server] - Joining game with the id #${joinGameId} for ${usernameJoiningGame}`);
+                    listOfGames[joinGameId].listOfPlayers.push(usernameJoiningGame);
+                    response.success = true;
+                    response.result = joinGameId;
+                }
+                else if (!listOfGames[joinGameId]) {
+                    console.log(
+                        `[NetTCP Server] - Game with the id #${joinGameId} doesn't exist`);
+                    response.success = false;
+                    response.result = `Game with the id #${joinGameId} doesn't exist`;
+                }
+                else if (!listOfRegisteredPlayers[usernameJoiningGame]) {
+                    console.log(
+                        `[NetTCP Server] - The username ${usernameJoiningGame} isn't registered to join the game with id #${joinGameId}`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${usernameJoiningGame} isn't registered to join the game with id #${joinGameId}`;
+                }
+                else if (listOfGames[joinGameId].listOfPlayers.includes(usernameJoiningGame))
+                {
+                    console.log(
+                        `[NetTCP Server] - The username ${usernameJoiningGame} has already join game with the id #${joinGameId}`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${usernameJoiningGame} has already join game with the id #${joinGameId}`;
+                }
                 break;
+            
+            /*
+            Handles the case when the network action is a registered username 
+            exiting an existing game on the servers by its id as well as indicating 
+            if the registered username isn't registered, if the registered username 
+            hasn't join the game, and if the game with the id doesn't exists
+            */
             case "exitGame":
-                console.log(
-                    `[NetTCP Server] - Ending game with id #${parseData.result}`);
+                response.action = parseData.action;
+                let exitGameId = parseData.payload[0];
+                let usernameExitingGame = parseData.payload[1];
+                if (listOfGames[exitGameId] &&
+                    listOfRegisteredPlayers[usernameExitingGame] && 
+                    listOfGames[exitGameId].listOfPlayers.includes(usernameExitingGame)) {
+                    console.log(
+                        `[NetTCP Server] - Exiting game with the id #${exitGameId} for ${usernameExitingGame}`);
+                    let indexOfUsernameToExit = 
+                        listOfGames[exitGameId].listOfPlayers.indexOf(usernameExitingGame);
+                    listOfGames[exitGameId].listOfPlayers.splice(indexOfUsernameToExit, 1);
+                    response.success = true;
+                    response.result = exitGameId;
+                }
+                else if (!listOfGames[exitGameId]) {
+                    console.log(
+                        `[NetTCP Server] - Game with the id #${exitGameId} doesn't exist`);
+                    response.success = false;
+                    response.result = `Game with the id #${exitGameId} doesn't exist`;
+                }
+                else if (!listOfRegisteredPlayers[usernameExitingGame]) {
+                    console.log(
+                        `[NetTCP Server] - The username ${usernameExitingGame} isn't registered to exit the game with id #${exitGameId}`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${usernameExitingGame} isn't registered to exit the game with id #${exitGameId}`;
+                }
+                else if (!listOfGames[exitGameId].listOfPlayers.includes(usernameExitingGame))
+                {
+                    console.log(
+                        `[NetTCP Server] - The username ${usernameExitingGame} hasn't join game with the id #${exitGameId}`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${usernameExitingGame} hasn't join game with the id #${exitGameId}`;
+                }
                 break;
+
+            /*
+            Handles the case when the network action is unregistering an existing 
+            username on the servers as well indicating if the username isn't 
+            registered
+            */
             case "unregister":
-                console.log(
-                    `[NetTCP Server] - Unregistering the username: ${parseData.result}`);
+                response.action = parseData.action;
+                let usernameToUnregister = parseData.payload;
+                if (listOfRegisteredPlayers[usernameToUnregister]) {
+                    console.log(
+                        `[NetTCP Server] - Unregistering the username: ${usernameToUnregister}`);
+                    delete listOfRegisteredPlayers[usernameToUnregister];
+                    response.success = true;
+                    response.result = usernameToUnregister;
+                }
+                else {
+                    console.log(
+                        `[NetTCP Server] - The username ${usernameToUnregister} isn't registered`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${usernameToUnregister} isn't registered`;
+                }
                 break;
+
             default:
                 break;
         }
 
         // Sends a response from the NetTCP server to the NetTCP client
         socketTCP.write(
-            `[NetTCP Server] - Sending response: ${JSON.stringify({ status: "success", action: parseData.action })}`);
+            `[NetTCP Server] - Sending response: ${JSON.stringify(response)}`);
     });
 
     /*
