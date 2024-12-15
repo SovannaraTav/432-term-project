@@ -3,6 +3,10 @@ body {
     text-align: center;
 }
 
+input {
+    width: 200px;
+}
+
 table {
     margin: 20px auto;
     border-collapse: collapse;

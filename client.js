@@ -86,7 +86,80 @@ class NetworkManager {
             this.#webSocketClient.send(message);
         }
     }
+
+    /*
+    Function to allow the WebSocket client to register an username to the 
+    WebSocket server through the NetworkManager
+    */
+    register(username) {
+        let registerData = {
+            action: "register",
+            result: username
+        };
+        this.send(JSON.stringify(registerData));
+    }
+
+    /*
+    Function to allow the WebSocket client to request for the list of games to 
+    the WebSocket server through the NetworkManager
+    */
+    listGames() {
+        let listGamesData = {
+            action: "listGames"
+        };
+        this.send(JSON.stringify(listGamesData));
+    }
+
+    /*
+    Function to allow the WebSocket client to create a game to the WebSocket 
+    server through the NetworkManager
+    */
+    createGame(gameId) {
+        let createGameData = {
+            action: "createGame",
+            result: gameId
+        };
+        this.send(JSON.stringify(createGameData));
+    }
+
+    /*
+    Function to allow the WebSocket client to join a game to the WebSocket 
+    server through the NetworkManager
+    */
+    joinGame(gameId) {
+        let joinGameData = {
+            action: "joinGame",
+            result: gameId
+        };
+        this.send(JSON.stringify(joinGameData));
+    }
+
+    /*
+    Function to allow the WebSocket client to exit a game to the WebSocket 
+    server through the NetworkManager
+    */
+    exitGame(gameId) {
+        let exitGameData = {
+            action: "exitGame",
+            result: gameId
+        };
+        this.send(JSON.stringify(exitGameData));
+    }
+
+    /*
+    Function to allow the WebSocket client to unregister an username to the 
+    WebSocket server through the NetworkManager
+    */
+    unregister(username) {
+        let unregisterData = {
+            action: "unregister",
+            result: username
+        };
+        this.send(JSON.stringify(unregisterData));
+    }
 }
+
+
 
 // Instantiating the NetworkManager to separate networking from game logic
 const webSocketPortNumber = 8081;
@@ -103,4 +176,57 @@ function sendMessage() {
     console.log(
         `[NetworkManager] - WebSocket client sending message to WebSocket server: ${message}`);
     networkManager.send(message);
+}
+
+/*
+Function to allow the WebSocket client to register an username to the WebSocket 
+server through the NetworkManager
+*/
+function register() {
+    let username = document.getElementById("registerInput").value;
+    networkManager.register(username);
+}
+
+/*
+Function to allow the WebSocket client to request for the list of games to the 
+WebSocket server through the NetworkManager
+*/
+function listGames() {
+    networkManager.listGames();
+}
+
+/*
+Function to allow the WebSocket client to create a game to the WebSocket server 
+through the NetworkManager
+*/
+function createGame() {
+    let createGameId = document.getElementById("createGameInput").value;
+    networkManager.createGame(createGameId);
+}
+
+/*
+Function to allow the WebSocket client to join a game to the WebSocket server 
+through the NetworkManager
+*/
+function joinGame() {
+    let joinGameId = document.getElementById("joinGameInput").value;
+    networkManager.joinGame(joinGameId);
+}
+
+/*
+Function to allow the WebSocket client to exit a game to the WebSocket server 
+through the NetworkManager
+*/
+function exitGame() {
+    let exitGameId = document.getElementById("exitGameInput").value;
+    networkManager.exitGame(exitGameId);
+}
+
+/*
+Function to allow the WebSocket client to unregister an username to the 
+WebSocket server through the NetworkManager
+*/
+function unregister() {
+    let username = document.getElementById("unregisterInput").value;
+    networkManager.unregister(username);
 }

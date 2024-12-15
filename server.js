@@ -32,8 +32,47 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
         console.log(
             `[NetTCP Server] - Received data from NetTCP client: ${data.toString()}`);
 
+        // For if the data received is a grid coordinate
+        if (data.toString().length === 2) {
+            // Sends a response from the NetTCP server to the NetTCP client
+            socketTCP.write(
+                `[NetTCP Server] - Received ${data.toString()} from NetTCP client`);
+            return;
+        }
+
+        // For if the data received is a network action
+        let parseData = JSON.parse(data);
+        switch (parseData.action) {
+            case "register":
+                console.log(
+                    `[NetTCP Server] - Registering the username: ${parseData.result}`);
+                break;
+            case "listGames":
+                console.log(`[NetTCP Server] - Listing games:`);
+                break;
+            case "createGame":
+                console.log(
+                    `[NetTCP Server] - Creating game with id #${parseData.result}`);
+                break;
+            case "joinGame":
+                console.log(
+                    `[NetTCP Server] - Joining game with id #${parseData.result}`);
+                break;
+            case "exitGame":
+                console.log(
+                    `[NetTCP Server] - Ending game with id #${parseData.result}`);
+                break;
+            case "unregister":
+                console.log(
+                    `[NetTCP Server] - Unregistering the username: ${parseData.result}`);
+                break;
+            default:
+                break;
+        }
+
         // Sends a response from the NetTCP server to the NetTCP client
-        socketTCP.write(`[NetTCP Server] - Received ${data.toString()} from NetTCP client`);
+        socketTCP.write(
+            `[NetTCP Server] - Sending response: ${JSON.stringify({ status: "success", action: parseData.action })}`);
     });
 
     /*
