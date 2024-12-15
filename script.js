@@ -65,7 +65,7 @@ document.getElementById("send").addEventListener("click", () => {
     const gridCoordinate = 
         document.getElementById("messageInput").value.toUpperCase().trim();
     const row = (gridCoordinate.charCodeAt(0) - 65);
-    const column = (parseInt(gridCoordinate[1]) - 1);
+    const column = (parseInt(gridCoordinate.slice(1)) - 1);
 
     if (row >= 0 && row < gridRowSize && 
         column >= 0 && column < gridColumnSize) {

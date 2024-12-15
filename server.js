@@ -37,7 +37,7 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
             `[NetTCP Server] - Received data from NetTCP client: ${data.toString()}`);
         
         // For when the data received is a grid coordinate
-        if (data.toString().length === 2) {
+        if (data.toString().length === 2 || data.toString().length === 3) {
             // Sends a response from the NetTCP server to the NetTCP client
             socketTCP.write(
                 `[NetTCP Server] - Received ${data.toString()} from NetTCP client`);
@@ -47,7 +47,7 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
         // For when the data received is a network action on the servers
         let parseData = JSON.parse(data);
         let response = {
-            action: "",
+            action: parseData.action,
             success: false,
             result: "",
         }
@@ -57,14 +57,14 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
             on the servers as well indicating if the username is already registered
             */
             case "register":
-                response.action = parseData.action;
                 let usernameToRegister = parseData.payload;
                 if (!listOfRegisteredPlayers[usernameToRegister]) {
                     console.log(
                         `[NetTCP Server] - Registering the username: ${usernameToRegister}`);
                     listOfRegisteredPlayers[usernameToRegister] = true;
                     response.success = true;
-                    response.result = usernameToRegister;
+                    response.result = 
+                        `Registering the username: ${usernameToRegister}`;
                 }
                 else {
                     console.log(
@@ -77,14 +77,28 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
 
             /*
             Handles the case when the network action is returning the list of games 
-            on the servers as well as indicating if the list of games is empty
+            on the servers as well as indicating if the list of games is empty and 
+            removing games when the list of players drops to zero
             */
             case "listGames":
-                response.action = parseData.action;
                 if (Object.keys(listOfGames).length !== 0) {
                     console.log("[NetTCP Server] - Returning list of games");
                     response.success = true;
-                    response.result = Object.keys(listOfGames);
+
+                    let gamesAndPlayersList = [];
+                    for(let gameId in listOfGames) {
+                        if (listOfGames[gameId].listOfPlayers.length !== 0)
+                        {
+                            gamesAndPlayersList.push({
+                                gameId: gameId,
+                                players: listOfGames[gameId].listOfPlayers
+                            });
+                        }
+                        else {
+                            delete listOfGames[gameId];
+                        }
+                    }
+                    response.result = gamesAndPlayersList;
                 }
                 else {
                     console.log("[NetTCP Server] - Empty game list");
@@ -100,7 +114,6 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
             already exists
             */
             case "createGame":
-                response.action = parseData.action;
                 let createGameId = parseData.payload[0];
                 let usernameCreatingGame = parseData.payload[1];
                 if (!listOfGames[createGameId] && 
@@ -110,7 +123,8 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
                     listOfGames[createGameId] = { listOfPlayers: [] };
                     listOfGames[createGameId].listOfPlayers.push(usernameCreatingGame);
                     response.success = true;
-                    response.result = createGameId;
+                    response.result = 
+                        `Creating game with the id #${createGameId} by ${usernameCreatingGame}`;
                 }
                 else if (!listOfRegisteredPlayers[usernameCreatingGame]) {
                     console.log(
@@ -121,9 +135,10 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
                 }
                 else {
                     console.log(
-                        `[NetTCP Server] - Game with the id #${createGameId} already exists`);
+                        `[NetTCP Server] - Game with the id #${createGameId} already exists. Not creating a game for ${usernameCreatingGame}`);
                     response.success = false;
-                    response.result = `Game with the id #${createGameId} already exists`;
+                    response.result = 
+                        `Game with the id #${createGameId} already exists. Not creating a game for ${usernameCreatingGame}`;
                 }
                 break;
 
@@ -134,7 +149,6 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
             has already join the game, and if the game with the id doesn't exists
             */
             case "joinGame":
-                response.action = parseData.action;
                 let joinGameId = parseData.payload[0];
                 let usernameJoiningGame = parseData.payload[1];
                 if (listOfGames[joinGameId] && 
@@ -144,13 +158,15 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
                         `[NetTCP Server] - Joining game with the id #${joinGameId} for ${usernameJoiningGame}`);
                     listOfGames[joinGameId].listOfPlayers.push(usernameJoiningGame);
                     response.success = true;
-                    response.result = joinGameId;
+                    response.result = 
+                        `Joining game with the id #${joinGameId} for ${usernameJoiningGame}`;
                 }
                 else if (!listOfGames[joinGameId]) {
                     console.log(
-                        `[NetTCP Server] - Game with the id #${joinGameId} doesn't exist`);
+                        `[NetTCP Server] - Game with the id #${joinGameId} doesn't exist for ${usernameJoiningGame} to join`);
                     response.success = false;
-                    response.result = `Game with the id #${joinGameId} doesn't exist`;
+                    response.result = 
+                        `Game with the id #${joinGameId} doesn't exist for ${usernameJoiningGame} to join`;
                 }
                 else if (!listOfRegisteredPlayers[usernameJoiningGame]) {
                     console.log(
@@ -176,7 +192,6 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
             hasn't join the game, and if the game with the id doesn't exists
             */
             case "exitGame":
-                response.action = parseData.action;
                 let exitGameId = parseData.payload[0];
                 let usernameExitingGame = parseData.payload[1];
                 if (listOfGames[exitGameId] &&
@@ -188,13 +203,15 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
                         listOfGames[exitGameId].listOfPlayers.indexOf(usernameExitingGame);
                     listOfGames[exitGameId].listOfPlayers.splice(indexOfUsernameToExit, 1);
                     response.success = true;
-                    response.result = exitGameId;
+                    response.result = 
+                        `Exiting game with the id #${exitGameId} for ${usernameExitingGame}`;
                 }
                 else if (!listOfGames[exitGameId]) {
                     console.log(
-                        `[NetTCP Server] - Game with the id #${exitGameId} doesn't exist`);
+                        `[NetTCP Server] - Game with the id #${exitGameId} doesn't exist for ${usernameExitingGame} to exit`);
                     response.success = false;
-                    response.result = `Game with the id #${exitGameId} doesn't exist`;
+                    response.result = 
+                        `Game with the id #${exitGameId} doesn't exist for ${usernameExitingGame} to exit`;
                 }
                 else if (!listOfRegisteredPlayers[usernameExitingGame]) {
                     console.log(
@@ -215,25 +232,33 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
 
             /*
             Handles the case when the network action is unregistering an existing 
-            username on the servers as well indicating if the username isn't 
-            registered
+            username on the servers and removing them from any games as well 
+            indicating if the username isn't registered
             */
             case "unregister":
-                response.action = parseData.action;
                 let usernameToUnregister = parseData.payload;
                 if (listOfRegisteredPlayers[usernameToUnregister]) {
                     console.log(
                         `[NetTCP Server] - Unregistering the username: ${usernameToUnregister}`);
+                    for(let gameId in listOfGames) {
+                        let game = listOfGames[gameId];
+                        let usernameIndex = 
+                            game.listOfPlayers.indexOf(usernameToUnregister);
+                        if (usernameIndex !== -1) {
+                            game.listOfPlayers.splice(usernameIndex, 1);
+                        }
+                    }
                     delete listOfRegisteredPlayers[usernameToUnregister];
                     response.success = true;
-                    response.result = usernameToUnregister;
+                    response.result = 
+                        `Unregistering the username: ${usernameToUnregister}`;
                 }
                 else {
                     console.log(
                         `[NetTCP Server] - The username ${usernameToUnregister} isn't registered`);
                     response.success = false;
                     response.result = 
-                        `The username ${usernameToUnregister} isn't registered`;
+                        `The username ${usernameToUnregister} isn't registered to unregister`;
                 }
                 break;
 

@@ -53,6 +53,62 @@ class NetworkManager {
         this.#webSocketClient.onmessage = (event) => {
             console.log(
                 `[NetworkManager] - WebSocket client received data from WebSocket server: ${event.data}`);
+
+            let startIndex = event.data.indexOf("{");
+            if (startIndex === -1) {
+                // For when the data received is a grid coordinate
+                return;
+            }
+
+            // For when the data received is a network action on the servers
+            let parseData = JSON.parse(event.data.substring(startIndex));
+            switch (parseData.action) {
+                // Handles the case of displaying the register status result
+                case "register":
+                    document.getElementById("registerStatus").innerText = parseData.result;
+                    break;
+
+                // Handles the case of displaying the list games status result
+                case "listGames":
+                    let listGamesStatusElement = document.getElementById("listGamesStatus");
+                    listGamesStatusElement.innerHTML = "";
+
+                    if (parseData.success) {
+                        parseData.result.forEach(game => {
+                            let gameInfoElement = document.createElement("p");
+                            gameInfoElement.innerHTML = 
+                                `<p>Game Id #${game.gameId} | Players: ${game.players.join(", ")}</p>`;
+                            listGamesStatusElement.appendChild(gameInfoElement);
+                        });
+                    }
+                    else {
+                        listGamesStatusElement.innerHTML = parseData.result;
+                    }
+                    break;
+
+                // Handles the case of displaying the create game status result
+                case "createGame":
+                    document.getElementById("createGameStatus").innerText = parseData.result;
+                    break;
+
+                // Handles the case of displaying the join game status result
+                case "joinGame":
+                    document.getElementById("joinGameStatus").innerText = parseData.result;
+                    break;
+
+                // Handles the case of displaying the exit game status result
+                case "exitGame":
+                    document.getElementById("exitGameStatus").innerText = parseData.result;
+                    break;
+
+                // Handles the case of displaying the unregister status result
+                case "unregister":
+                    document.getElementById("unregisterStatus").innerText = parseData.result;
+                    break;
+
+                default:
+                    break;
+            }
         };
 
         /*
@@ -173,9 +229,12 @@ through the NetworkManager
 */
 function sendMessage() {
     let message = document.getElementById("messageInput").value;
-    console.log(
-        `[NetworkManager] - WebSocket client sending message to WebSocket server: ${message}`);
-    networkManager.send(message);
+    if (message.length === 2 || message.length === 3)
+    {
+        console.log(
+            `[NetworkManager] - WebSocket client sending message to WebSocket server: ${message}`);
+        networkManager.send(message.toUpperCase());
+    }
 }
 
 /*
@@ -184,7 +243,10 @@ server through the NetworkManager
 */
 function register() {
     let username = document.getElementById("registerInput").value;
-    networkManager.register(username);
+    if (username.trim().length !== 0)
+    {
+        networkManager.register(username);
+    }
 }
 
 /*
@@ -202,7 +264,10 @@ through the NetworkManager
 function createGame() {
     let createGameId = document.getElementById("createGameInput").value;
     let username = document.getElementById("registerInput").value;
-    networkManager.createGame(createGameId, username);
+    if (createGameId >= 1 && username.trim().length !== 0)
+    {
+        networkManager.createGame(createGameId, username);
+    }
 }
 
 /*
@@ -212,7 +277,10 @@ through the NetworkManager
 function joinGame() {
     let joinGameId = document.getElementById("joinGameInput").value;
     let username = document.getElementById("registerInput").value;
-    networkManager.joinGame(joinGameId, username);
+    if (joinGameId >= 1 && username.trim().length !== 0)
+    {
+        networkManager.joinGame(joinGameId, username);
+    }
 }
 
 /*
@@ -222,7 +290,10 @@ through the NetworkManager
 function exitGame() {
     let exitGameId = document.getElementById("exitGameInput").value;
     let username = document.getElementById("registerInput").value;
-    networkManager.exitGame(exitGameId, username);
+    if (exitGameId >= 1 && username.trim().length !== 0)
+    {
+        networkManager.exitGame(exitGameId, username);
+    }
 }
 
 /*
@@ -231,5 +302,8 @@ WebSocket server through the NetworkManager
 */
 function unregister() {
     let username = document.getElementById("unregisterInput").value;
-    networkManager.unregister(username);
+    if (username.trim().length !== 0)
+    {
+        networkManager.unregister(username);
+    }
 }

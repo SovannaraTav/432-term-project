@@ -7,7 +7,83 @@
     <body>
         <h1>Battleship Game</h1>
         <!-- Displays the connection status to the user -->
-        <p id="status">Connecting...</p>
+        <p><strong>Connection status:</strong>
+            <span id="status">Connecting...</span>
+        </p>
+
+        <!-- Allows the user to send the username to register to the WebSocket and 
+        NetTCP servers and displays the register status -->
+        <p><strong>Register status:</strong>
+            <span id="registerStatus"></span>
+        </p>
+        <label for="registerInput">Register username: </label>
+        <input 
+            type="text" id="registerInput" name="registerInput" 
+            placeholder="Enter an username to register">
+        <button id="registerSend" onclick="register()">Register</button>
+        <br>
+
+        <!-- Allows the user to request for the list of games to the WebSocket and 
+        NetTCP servers and displays the list games status -->
+        <p><strong>List games status:</strong>
+            <span id="listGamesStatus"></span>
+        </p>
+        <button id="listGamesButton" onclick="listGames()">List games</button>
+        <br>
+
+        <!-- Allows the user to send the create game ID to the WebSocket and 
+        NetTCP servers and displays the create game status -->
+        <p><strong>Create game status:</strong>
+            <span id="createGameStatus"></span>
+        </p>
+        <label for="createGameInput">Create game: </label>
+        <input 
+            type="number" id="createGameInput" name="createGameInput" 
+            placeholder="Enter a game ID to create" min="1">
+        <button id="createGameSend" onclick="createGame()">Create game</button>
+        <br>
+
+        <!-- Allows the user to send the join game ID to the WebSocket and 
+        NetTCP servers and displays the join game status -->
+        <p><strong>Join game status:</strong>
+            <span id="joinGameStatus"></span>
+        </p>
+        <label for="joinGameInput">Join game: </label>
+        <input 
+            type="number" id="joinGameInput" name="joinGameInput" 
+            placeholder="Enter a game ID to join" min="1">
+        <button id="joinGameSend" onclick="joinGame()">Join game</button>
+        <br>
+
+        <!-- Allows the user to send the exit game ID to the WebSocket and 
+        NetTCP servers and displays the exit game status -->
+        <p><strong>Exit game status:</strong>
+            <span id="exitGameStatus"></span>
+        </p>
+        <label for="exitGameInput">Exit game: </label>
+        <input 
+            type="number" id="exitGameInput" name="exitGameInput" 
+            placeholder="Enter a game ID to exit" min="1">
+        <button id="exitGameSend" onclick="exitGame()">Exit game</button>
+        <br>
+
+        <!-- Allows the user to send the username to unregister to the WebSocket and 
+        NetTCP servers and displays the unregister status -->
+        <p><strong>Unregister game status:</strong>
+            <span id="unregisterStatus"></span>
+        </p>
+        <label for="unregisterInput">Unregister username: </label>
+        <input 
+            type="text" id="unregisterInput" name="unregisterInput" 
+            placeholder="Enter an username to unregister">
+        <button id="unregisterSend" onclick="unregister()">Unregister</button>
+        <br>
+
+        <!-- Displays to the user whether their selected coordinate was a hit or miss 
+        for the grid of the battleship game-->
+        <p><strong>Result:</strong>
+            <span id="message">
+        </span></p>
 
         <!-- Allows the user to send their selected coordinate to the WebSocket and 
         NetTCP servers as well as update the state of the grid for the battleship game -->
@@ -15,62 +91,8 @@
         <input 
             type="text" id="messageInput" name="messageInput" 
             placeholder="Enter a message to send">
-        <button id="send" onclick="sendMessage()">Send Message</button>
+        <button id="send" onclick="sendMessage()">Send</button>
         <br>
-
-        <!-- Allows the user to send the username to register to the WebSocket and 
-        NetTCP servers -->
-        <label for="registerInput">Register username: </label>
-        <input 
-            type="text" id="registerInput" name="registerInput" 
-            placeholder="Enter an username to send">
-        <button id="registerSend" onclick="register()">Send Username</button>
-        <br>
-
-        <!-- Allows the user to request for the list of games to the WebSocket and 
-        NetTCP servers -->
-        <button id="listGamesButton" onclick="listGames()">List Games</button>
-        <br>
-
-        <!-- Allows the user to send the create game ID to the WebSocket and 
-        NetTCP servers -->
-        <label for="createGameInput">Create game: </label>
-        <input 
-            type="number" id="createGameInput" name="createGameInput" 
-            placeholder="Enter a create game ID to send">
-        <button id="createGameSend" onclick="createGame()">Send Create Game ID</button>
-        <br>
-
-        <!-- Allows the user to send the join game ID to the WebSocket and 
-        NetTCP servers -->
-        <label for="joinGameInput">Join game: </label>
-        <input 
-            type="number" id="joinGameInput" name="joinGameInput" 
-            placeholder="Enter a join game ID to send">
-        <button id="joinGameSend" onclick="joinGame()">Send Join Game ID</button>
-        <br>
-
-        <!-- Allows the user to send the exit game ID to the WebSocket and 
-        NetTCP servers -->
-        <label for="exitGameInput">Exit game: </label>
-        <input 
-            type="number" id="exitGameInput" name="exitGameInput" 
-            placeholder="Enter an exit game ID to send">
-        <button id="exitGameSend" onclick="exitGame()">Send Exit Game ID</button>
-        <br>
-
-        <!-- Allows the user to send the username to unregister to the WebSocket and 
-        NetTCP servers -->
-        <label for="unregisterInput">Unregister username: </label>
-        <input 
-            type="text" id="unregisterInput" name="unregisterInput" 
-            placeholder="Enter an username to send">
-        <button id="unregisterSend" onclick="unregister()">Send Username</button>
-        <br>
-
-        <!-- Displays to the user whether their selected coordinate was a hit or miss 
-        for the grid of the battleship game-->
-        <p>Result: <span id="message"></span></p>
 
         <table id="grid" class="grid">
             <!-- script.js handles the process of creating the grid for the battleship 
