@@ -17,6 +17,7 @@ d) My CSS 481 course textbook on web sockets (Chapter 8, Section 12)
 // List of registered players and games for the servers
 let listOfRegisteredPlayers = {};
 let listOfGames = {};
+let listOfGamesWon = {};
 
 // NetTCP server information
 const netTCP = require("node:net");
@@ -259,6 +260,55 @@ const netTCPServer = netTCP.createServer((socketTCP) => {
                     response.success = false;
                     response.result = 
                         `The username ${usernameToUnregister} isn't registered to unregister`;
+                }
+                break;
+
+            /*
+            Handles the case when the network action is checking if there is a 
+            winner or not for an existing game on the servers by its id as well as 
+            indicating with game with the id doesn't exist
+            */
+            case "checkWinner":
+                let checkWinnerGameId = parseData.payload[0];
+                let checkWinnerUsername = parseData.payload[1];
+                if (listOfGames[checkWinnerGameId] && 
+                    checkWinnerUsername.length === 0) {
+                    console.log(
+                        `[NetTCP Server] - Returning the winner of the game with id #${checkWinnerGameId}!`);
+                    response.success = true;
+
+                    if (listOfGamesWon[checkWinnerGameId]) {
+                        response.result = 
+                            `Congratulations, ${listOfGamesWon[checkWinnerGameId]} has won the game with id #${checkWinnerGameId}`;
+                    }
+                    else {
+                        response.result = 
+                            `No winner yet for the game with id #${checkWinnerGameId}`;
+                    }
+                }
+                else if (listOfGames[checkWinnerGameId] && 
+                    listOfRegisteredPlayers[checkWinnerUsername] && 
+                    listOfGames[checkWinnerGameId].listOfPlayers.includes(checkWinnerUsername)) {
+                    console.log(
+                        `[NetTCP Server] - Congratulations, ${checkWinnerUsername} has won the game with id #${checkWinnerGameId}!`);
+                    listOfGamesWon[checkWinnerGameId] = checkWinnerUsername;
+                    response.success = true;
+                    response.result = 
+                        `Congratulations, ${checkWinnerUsername} has won the game with id #${checkWinnerGameId}`;
+                }
+                else if (!listOfGames[checkWinnerGameId]) {
+                    console.log(
+                        `[NetTCP Server] - Game with the id #${checkWinnerGameId} doesn't exist to check for a winner`);
+                    response.success = false;
+                    response.result = 
+                        `Game with the id #${checkWinnerGameId} doesn't exist to check for a winner`;
+                }
+                else if (!listOfRegisteredPlayers[checkWinnerUsername]) {
+                    console.log(
+                        `[NetTCP Server] - The username ${checkWinnerUsername} isn't registered to check winner of the game with id #${checkWinnerGameId}`);
+                    response.success = false;
+                    response.result = 
+                        `The username ${checkWinnerUsername} isn't registered to check winner of the game with id #${checkWinnerGameId}`;
                 }
                 break;
 

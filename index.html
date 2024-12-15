@@ -79,19 +79,34 @@
         <button id="unregisterSend" onclick="unregister()">Unregister</button>
         <br>
 
+        <!-- Allows the user to request if there is a winner for the current game
+        to the WebSocket and NetTCP servers and displays the winner status -->
+        <p><strong>Check winner status:</strong>
+            <span id="checkWinnerStatus">
+        </span></p>
+        <label for="checkWinnerInput">Check winner username: </label>
+        <input 
+            type="text" id="checkWinnerInput" name="checkWinnerInput" 
+            placeholder="Winner username will be display here" oninput="checkWinner()" 
+            disabled>
+        <button id="checkWinnerSend" onclick="checkWinner()">Check winner</button>
+        <br>
+
         <!-- Displays to the user whether their selected coordinate was a hit or miss 
         for the grid of the battleship game-->
-        <p><strong>Result:</strong>
+        <p><strong>Grid result:</strong>
             <span id="message">
         </span></p>
 
         <!-- Allows the user to send their selected coordinate to the WebSocket and 
-        NetTCP servers as well as update the state of the grid for the battleship game -->
+        NetTCP servers as well as update the state of the grid for the battleship game. 
+        Disabled the input field and button since the user can click on a grid 
+        coordinate to send -->
         <label for="messageInput">Message: </label>
         <input 
             type="text" id="messageInput" name="messageInput" 
-            placeholder="Enter a message to send">
-        <button id="send" onclick="sendMessage()">Send</button>
+            placeholder="Click on a grid coordinate cell to send" oninput="sendMessage()" disabled>
+        <button id="send" onclick="sendMessage()" disabled>Send</button>
         <br>
 
         <table id="grid" class="grid">

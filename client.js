@@ -106,6 +106,11 @@ class NetworkManager {
                     document.getElementById("unregisterStatus").innerText = parseData.result;
                     break;
 
+                // Handles the case of displaying the check winner status result
+                case "checkWinner":
+                    document.getElementById("checkWinnerStatus").innerText = parseData.result;
+                    break;
+
                 default:
                     break;
             }
@@ -213,6 +218,18 @@ class NetworkManager {
         };
         this.send(JSON.stringify(unregisterData));
     }
+
+    /*
+    Function to allow the WebSocket client to request for check winner to the 
+    WebSocket server through the NetworkManager
+    */
+    checkWinner(gameId, username) {
+        let checkWinnerData = {
+            action: "checkWinner",
+            payload: [gameId, username]
+        }
+        this.send(JSON.stringify(checkWinnerData));
+    }
 }
 
 
@@ -305,5 +322,31 @@ function unregister() {
     if (username.trim().length !== 0)
     {
         networkManager.unregister(username);
+    };
+}
+
+/*
+Function to allow the WebSocket client to request for check winner to the 
+WebSocket server through the NetworkManager
+*/
+function checkWinner() {
+    /*
+    Only the create game or join game input element can have a value while the 
+    other is empty
+    */
+    let createGameId = document.getElementById("createGameInput").value;
+    let joinGameId = document.getElementById("joinGameInput").value;
+    let gameId;
+    if (createGameId && !joinGameId) {
+        gameId = createGameId;
     }
+    else if (!createGameId && joinGameId) {
+        gameId = joinGameId;
+    }
+    else {
+        return;
+    }
+
+    let username = document.getElementById("checkWinnerInput").value;
+    networkManager.checkWinner(gameId, username);
 }

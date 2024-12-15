@@ -1,15 +1,21 @@
-// Battleship Game properties
+/*
+Battleship Game properties. The user who hosts the server beforehand can change 
+their ship placements before starting the server and allowing clients to connect 
+to the server
+*/
 const gridRowSize = 10;
 const gridColumnSize = 10;
 const shipPlacements = 
     [
-    "I7",
-    "E4", "E5",
-    "A1", "A2", "A3",
-    "J1", "J2", "J3", "J4", 
-    "F10", "G10", "H10", "I10", "J10"
+    "I7", // 1-length ship
+    "E4", "E5", // 2-length ship. Only vertical or horizontal
+    "A1", "A2", "A3", // 3-length ship. Only vertical or horizontal
+    "J1", "J2", "J3", "J4", // 4-length ship. Only vertical or horizontal
+    "F10", "G10", "H10", "I10", "J10" // 5-length ship. Only vertical or horizontal
     ];
 let grid = [];
+let playerHitCoordinates = [];
+let isGameOver = false;
 
 /*
 Function that handles the process of creating the necessary HTML elements and 
@@ -40,26 +46,59 @@ function createBattleshipGameGrid() {
 
 /*
 Function that handles the process of updating the state of the grid for the 
-battleship game when the user clicks on a table data cell
+battleship game when the user clicks on a table data cell and checking the game 
+status
 */
 function handleTableDataCellClick(event) {
+    if (isGameOver) {
+        return;
+    }
+
+    // Automatically fills in the text input element after clicking
     const clickedTableDataCell = event.target;
     const gridCoordinate = clickedTableDataCell.id;
+    const messageInputElement = document.getElementById("messageInput");
+    messageInputElement.value = gridCoordinate;
+    const inputEvent = new Event("input");
+    messageInputElement.dispatchEvent(inputEvent);
 
     if (shipPlacements.includes(gridCoordinate)) {
         clickedTableDataCell.style.backgroundColor = "orange";
+        playerHitCoordinates.push(gridCoordinate);
         displayMessage(`Hit on ${gridCoordinate}!`);
     }
     else {
         clickedTableDataCell.style.backgroundColor = "skyblue";
         displayMessage(`Miss on ${gridCoordinate}!`);
     }
+
+    checkGameStatus();
+}
+
+/*
+Function that handles the process of determining whether the battleship game is 
+over or not by checking if all ship placements were hit and displaying a 
+congratulations message if so
+*/
+function checkGameStatus() {
+    let isAllShipsHit = 
+        shipPlacements.every(ship => playerHitCoordinates.includes(ship));
+    const username = document.getElementById("registerInput").value;
+    if (isAllShipsHit && username.trim().length !== 0) {
+        isGameOver = true;
+        const checkWinnerInputElement = document.getElementById("checkWinnerInput");
+        checkWinnerInputElement.value = username;
+        const inputEvent = new Event("input");
+        checkWinnerInputElement.dispatchEvent(inputEvent);
+        displayMessage(`Congratulations, ${username} has won the game!`);
+    }
 }
 
 /*
 Function that handles the process of updating the state of the grid for the 
 battleship game when the user specifies the coordinate of a table data cell 
-in the text input element
+in the text input element. Currently disabled since the user can click on the 
+grid to update the state of it
 */
 document.getElementById("send").addEventListener("click", () => {
     const gridCoordinate = 
